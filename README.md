@@ -2,155 +2,90 @@
 
 A fully normalized relational database system built using **Microsoft SQL Server (T-SQL)**, simulating the backend data infrastructure of an e-commerce platform. This project covers end-to-end database design including schema creation, data insertion, stored procedures, triggers, views, and role-based access control.
 
+Now features an **AI-powered NLP-to-SQL Chatbot** using **Ollama** for natural language querying!
+
 ---
 
 ## 📁 Project Structure
 
-| File | Description |
-|------|-------------|
-| `Creation.sql` | Database creation and recovery configuration |
-| `Schemas.sql` | Table definitions with constraints and relationships |
-| `Insert_Data.sql` | Sample data population for all tables |
-| `Views.sql` | Aggregate views for reporting and analytics |
-| `Stored_Procedures.sql` | Reusable procedures for user and order management |
-| `Triggers.sql` | Automated triggers for inventory and audit logging |
-| `Securities.sql` | Role-based access control (RBAC) configuration |
-| `SQLQuery8.sql` | Server configuration and connection diagnostics |
+| File / Folder | Description |
+|---------------|-------------|
+| `SQL/Creation.sql` | Database creation and recovery configuration |
+| `SQL/Schemas.sql` | Table definitions with constraints and relationships |
+| `SQL/Insert_Data.sql` | Sample data population for all tables |
+| `SQL/Views.sql` | Aggregate views for reporting and analytics |
+| `SQL/Stored_Procedures.sql` | Reusable procedures for user and order management |
+| `SQL/Triggers.sql` | Automated triggers for inventory and audit logging |
+| `SQL/Securities.sql` | Role-based access control (RBAC) configuration |
+| `ChatbotAI/nlp_to_sql.py` | **[NEW]** NLP-to-SQL CLI tool using Ollama (Llama 3.2) |
+| `ERDs/` | Entity Relationship Diagrams for the database |
 
 ---
 
-## 🗄️ Database Schema
+## 🤖 AI Chatbot (NLP to SQL)
 
-The database consists of **11 relational tables** organized around the core e-commerce entities:
+The project includes an intelligent interface that allows you to query your database using plain English. 
 
-```
-Users ──< UserRoles >── Roles
-Users ──< Orders ──< OrderItems >── Products ──< Categories
-                                               └── Suppliers
-Orders ──< Payments
-Products ──< Inventory
-Users ──< Reviews >── Products
-AuditLog
-```
-
-### Tables Overview
-
-| Table | Purpose |
-|-------|---------|
-| `Users` | Stores customer and admin profiles |
-| `Roles` | Defines system roles (Admin, Customer, Supplier) |
-| `UserRoles` | Many-to-many mapping of users to roles |
-| `Categories` | Product category classification |
-| `Suppliers` | Supplier contact and location details |
-| `Products` | Product catalog with pricing and metadata |
-| `Inventory` | Real-time stock quantity per product |
-| `Orders` | Order records with status tracking |
-| `OrderItems` | Line items linking orders to products |
-| `Payments` | Payment records per order |
-| `Reviews` | User ratings and comments per product |
-| `AuditLog` | System-wide action audit trail |
+### How it Works:
+1. **Natural Language Input**: Type a query like *"Show me the total revenue from Laptops"*.
+2. **AI Reasoning**: The tool uses **Ollama (Llama 3.2)** to analyze the database schema and generate a precise T-SQL query.
+3. **Execution**: The generated SQL runs securely against your SQL Server.
+4. **Presentation**: Results are formatted into a clean, readable table in your terminal.
 
 ---
 
 ## ⚙️ Features
 
 ### ✅ Data Modeling & Normalization
-- Fully normalized schema (3NF) with clearly defined primary keys, foreign keys, and unique constraints
-- CHECK constraints on critical fields like `OrderStatus`, `PaymentStatus`, and `Rating`
-- `IDENTITY` columns for auto-incrementing primary keys across all major tables
+- Fully normalized schema (3NF) with clearly defined primary keys, foreign keys, and unique constraints.
+- `IDENTITY` columns for auto-incrementing primary keys.
 
-### ✅ Stored Procedures
-- **`AddUser`** — Inserts a new user into the system
-- **`GetUserByID`** — Fetches a user record by ID
-- **`AddOrder`** — Creates a new order for a given user
-- **`SearchProducts`** — Keyword-based product search using `LIKE`
+### ✅ AI Integration (New!)
+- **NLP Interpretation**: Converts complex English questions into multi-join SQL queries.
+- **Dynamic Context**: The AI is "aware" of your specific table names, relationships, and sample data.
 
-### ✅ Triggers
-- **`LogUserInsertions`** — Automatically logs every new user insert into `AuditLog`
-- **`UpdateStockAfterOrders`** — Deducts stock from `Inventory` in real time after an order item is inserted
-
-### ✅ Views
-- **`SalesSummary`** — Aggregates total units sold and revenue per product
-- **`CustomerOrderOverview`** — Provides a full order summary per customer including totals and status
-- **`ProductPerformanceView`** — Combines product, category, supplier, sales, and stock data for performance analysis
-
-### ✅ Role-Based Access Control (RBAC)
-- `db_reader` role — Granted SELECT access on Users, Products, Orders, and SalesSummary
-- `db_writer` role — Granted INSERT/UPDATE access on Orders, OrderItems, and Payments
-
-### ✅ Audit Logging
-- Every significant action (INSERT, UPDATE) is tracked in the `AuditLog` table with the actor, table name, action type, and timestamp
+### ✅ Database Logic
+- **Stored Procedures**: `AddUser`, `AddOrder`, `SearchProducts`.
+- **Triggers**: Real-time inventory updates and audit logging.
+- **Views**: `SalesSummary`, `CustomerOrderOverview`, `ProductPerformanceView`.
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Microsoft SQL Server (2019 or later recommended)
-- SQL Server Management Studio (SSMS)
+- Microsoft SQL Server (2019 or later) & SSMS.
+- **Python 3.8+** (for the Chatbot).
+- **Ollama** installed locally (https://ollama.com).
 
-### Setup Instructions
+### 1. Database Setup
+Run the SQL scripts in the `SQL/` folder in this order:
+1. `Creation.sql`
+2. `Schemas.sql`
+3. `Insert_Data.sql`
+4. `Views.sql`, `Stored_Procedures.sql`, `Triggers.sql`, `Securities.sql`.
 
-1. **Create the database**
-   ```sql
-   -- Run Creation.sql
-   CREATE DATABASE INTERNPROJECTSQL;
+### 2. Chatbot Setup (Ollama)
+1. Install dependencies:
+   ```bash
+   pip install ollama pyodbc tabulate
    ```
-
-2. **Create the schema**
-   ```sql
-   -- Run Schemas.sql
-   -- Creates all 11 tables with constraints and relationships
+2. Pull the required AI model:
+   ```bash
+   ollama pull llama3.2
    ```
-
-3. **Insert sample data**
-   ```sql
-   -- Run Insert_Data.sql
-   -- Populates all tables with realistic test data
-   ```
-
-4. **Create views**
-   ```sql
-   -- Run Views.sql
-   ```
-
-5. **Create stored procedures**
-   ```sql
-   -- Run Stored_Procedures.sql
-   ```
-
-6. **Create triggers**
-   ```sql
-   -- Run Triggers.sql
-   ```
-
-7. **Apply security roles**
-   ```sql
-   -- Run Securities.sql
-   ```
-
-> Run the files in the order listed above to avoid foreign key dependency errors.
+3. Update `DB_CONFIG` in `ChatbotAI/nlp_to_sql.py` with your server name.
 
 ---
 
-## 📊 Sample Queries
+## 📊 Sample Queries (NLP)
 
-```sql
--- View sales performance ranked by revenue
-SELECT * FROM SalesSummary ORDER BY TotalRevenue DESC;
+Once the chatbot is running (`python ChatbotAI/nlp_to_sql.py`), you can ask:
 
--- View all customer orders with totals
-SELECT * FROM CustomerOrderOverview ORDER BY OrderTotal DESC;
-
--- View product performance across categories
-SELECT * FROM ProductPerformanceView ORDER BY RevenueGenerated DESC;
-
--- Search for a product
-EXEC SearchProducts @Keyword = 'Laptop';
-
--- Add a new user
-EXEC AddUser @FullName = 'John Doe', @Email = 'john@gmail.com', @Phone = '9876512345';
-```
+- *"Who are our top 5 customers by order volume?"*
+- *"Which products are currently low on stock (less than 10 units)?"*
+- *"Show me the total sales for each category this month."*
+- *"Find all reviews for 'Laptop' with a rating higher than 4."*
 
 ---
 
@@ -158,13 +93,14 @@ EXEC AddUser @FullName = 'John Doe', @Email = 'john@gmail.com', @Phone = '987651
 
 | Layer | Technology |
 |-------|------------|
-| Language | T-SQL |
-| Database | Microsoft SQL Server (MSSQL) |
-| Tool | SQL Server Management Studio (SSMS) |
-| Concepts | Relational DB Design, Normalization, DDL, DML, RBAC, Triggers, Stored Procedures, Views, Audit Logging |
+| **Database** | Microsoft SQL Server (T-SQL) |
+| **AI Engine** | Ollama (Llama 3.2 Model) |
+| **Logic Layer** | Python 3.x |
+| **Interface** | CLI (Python / Tabulate) |
+| **Tools** | SSMS, ODBC Driver 17 |
 
 ---
 
 ## 👤 Author
 
-Developed as part of an internship project to demonstrate practical skills in database design, data modeling, and SQL Server development.
+Developed by **Rohith Kanna S** as part of an e-commerce database engineering project.

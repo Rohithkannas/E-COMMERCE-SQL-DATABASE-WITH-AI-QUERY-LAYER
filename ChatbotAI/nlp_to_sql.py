@@ -91,6 +91,24 @@ RULES:
    Suppliers  → sup
    Categories → cat
    AuditLog   → al
+
+   CRITICAL: You must follow these rules without exception.
+
+EXACT TABLE ALIASES — use ONLY these, never anything else:
+Users = u, Orders = o, OrderItems = oi, Products = prod,
+Payments = pay, Reviews = r, Inventory = inv,
+Suppliers = sup, Categories = cat, AuditLog = al
+
+EXACT COLUMN NAMES — use only these, no invented columns:
+Categories: CategoryID, CategoryName, Description
+Products: ProductID, ProductName, CategoryID, SupplierID, Price, Description, Size, Colour, Weight, Brand
+Users: UserID, FullName, Email, Phone, CreatedAt
+Orders: OrderID, UserID, OrderStatus, OrderDate
+OrderItems: OrderID, ProductID, Quantity, UnitPrice
+Payments: PaymentID, OrderID, Amount, PaymentMethod, PaymentStatus, PaymentDate
+Reviews: ReviewID, UserID, ProductID, OrderID, Rating, Comment, ReviewDate
+Inventory: ProductID, StockQty, LastUpdated
+Suppliers: SupplierID, SupplierName, ContactEmail, ContactPhone, City, State, Country, PostalCode
 """
 
 
@@ -118,6 +136,18 @@ def generate_sql(client, question: str) -> str:
     # Fix MySQL syntax → SQL Server syntax
     import re
     sql = re.sub(r'LIMIT\s+\d+', '', sql).strip()
+    # Extract only first statement
+    sql = sql.split(';')[0].strip()
+    # Remove explanation lines
+    lines = sql.split('\n')
+    clean_lines = [l for l in lines if not l.strip().lower().startswith(('or ', 'alternatively', 'note:', 'this ', 'the ', 'here', 'you can'))]
+    sql = '\n'.join(clean_lines).strip()
+    # Force correct aliases — fix whatever the model uses
+    sql = re.sub(r'\bp\.(?=\w)', 'prod.', sql)
+    sql = re.sub(r'\bc\.(?=\w)', 'cat.', sql)
+    sql = re.sub(r'\bpy\.(?=\w)', 'pay.', sql)
+    sql = re.sub(r'\bs\.(?=\w)', 'sup.', sql)
+    sql = re.sub(r'\bi\.(?=\w)', 'inv.', sql)
     return sql
 
 def run_query(conn, sql: str):
